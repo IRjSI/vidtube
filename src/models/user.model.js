@@ -41,7 +41,7 @@ const userSchema = new mongoose.Schema({
 
 // when we have a method that is inclusively for the model so we don't write separately in controller
 userSchema.pre("save", async function (next) {
-    if (!this.modified("password")) return next()
+    if (!this.isModified("password")) return next()
 
     this.password = bcrypt.hash(this.password,10)
 
