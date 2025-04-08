@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import jwt from "jsonwebtoken";
 
 const generateAccessAndRefreshToken = async (userId) => {
     try {
@@ -83,6 +84,51 @@ const loginUser = asyncHandler(async (req,res) => {
     }
 
     return res.status(200).cookie('accessToken', accessToken, options).cookie('refreshToken', refreshToken, options).json(new ApiResponse(200, { user }, 'user logged in'))
+})
+
+const logoutUser = asyncHandler(async (req,res) => {
+    await UserModel.findByIdAndUpdate(
+        //TODO
+    )
+})
+
+const refreshAccessToken = asyncHandler(async (req,res) => {
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
+    if (!incomingRefreshToken) {
+        throw new ApiError(401, 'Refresh token is required');
+    }
+    try {
+        const decodedToken = jwt.verify(incomingRefreshToken, process.env.JWT_SECRET);
+        const user = await UserModel.findById(decodedToken?._id);
+        if (!user) {
+            throw new ApiError(401, 'invalid refresh token');
+        }
+
+        if (user?.refreshToken !== incomingRefreshToken) {
+            throw new ApiError(401, 'invalid refresh token');
+        }
+
+        const options = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV || "production"
+        }
+
+        const { accessToken, refreshToken: newRefreshToken } = await generateAccessAndRefreshToken(user._id);
+
+        return res
+            .status(200)    
+            .cookie('accessToken', accessToken, options)
+            .cookie('refreshToken', newRefreshToken, options)   
+            .json(
+                new ApiResponse(
+                    200,
+                    { accessToken, refreshToken: newRefreshToken },
+                    'access token refreshed successfully'
+                )
+            );
+    } catch (error) {
+        throw new ApiError(500, 'something went wrong while refreshing token');
+    }
 })
 
 export { registerUser, loginUser };
