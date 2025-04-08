@@ -88,8 +88,27 @@ const loginUser = asyncHandler(async (req,res) => {
 
 const logoutUser = asyncHandler(async (req,res) => {
     await UserModel.findByIdAndUpdate(
-        //TODO
+        req.user._id, // since we stored user in req in auth middleware
+        {
+            $set: {
+                refreshToken: ''
+            }
+        },
+        {
+            new: true
+        }
     )
+
+    const options = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV || "production"
+    }
+
+    return res
+        .status(200)
+        .clearCookie('accessToken', options)
+        .clearCookie('refreshToken', options)
+        .json(new ApiResponse(200, {}, 'User logged out successfully'))
 })
 
 const refreshAccessToken = asyncHandler(async (req,res) => {
@@ -131,4 +150,4 @@ const refreshAccessToken = asyncHandler(async (req,res) => {
     }
 })
 
-export { registerUser, loginUser };
+export { registerUser, loginUser, logoutUser, refreshAccessToken };
