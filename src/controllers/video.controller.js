@@ -65,7 +65,7 @@ const updateVideo = asyncHandler(async (req, res) => {
         throw new ApiError(500, 'Something went wrong while uploading avatar')
     }
 
-    const video = await VideoModel.findByIdAndUpdate({ _id: videoId, owner: req.user._id }, {
+    const video = await VideoModel.findOneAndUpdate({ _id: videoId, owner: req.user._id }, {
         $set: {
             title,
             description,
@@ -80,7 +80,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     //TODO: delete video
 
-    await VideoModel.findByIdAndDelete({ _id: videoId, owner: req.user._id });
+    await VideoModel.findOneAndDelete({ _id: videoId, owner: req.user._id });
 
     return res.status(200).json(new ApiResponse(200, {}, 'Video deleted'))
 })
@@ -88,7 +88,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
 const togglePublishStatus = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     const { status } = req.body;
-    const video = await VideoModel.findByIdAndUpdate({ _id: videoId, owner: req.user._id }, {
+    const video = await VideoModel.findOneAndUpdate({ _id: videoId, owner: req.user._id }, {
         $set: {
             isPublished: status
         }

@@ -32,7 +32,7 @@ const updateTweet = asyncHandler(async (req, res) => {
     //TODO: update tweet
     const { tweetId } = req.params;
     const { newContent } = req.body;
-    const tweet = await TweetModel.findByIdAndUpdate({ _id: tweetId, owner: req.user._id /* only owner can edit */ }, {
+    const tweet = await TweetModel.findOneAndUpdate({ _id: tweetId, owner: req.user._id /* only owner can edit */ }, {
         $set: {
             content: newContent
         }
@@ -48,7 +48,7 @@ const deleteTweet = asyncHandler(async (req, res) => {
     //TODO: delete tweet
     const { tweetId } = req.params;
 
-    await TweetModel.findByIdAndDelete({ _id: tweetId, owner: req.user._id })
+    await TweetModel.findOneAndDelete({ _id: tweetId, owner: req.user._id })
 
     return res.status(200).json(new ApiResponse(200, {}, 'tweet deleted'))
 })
