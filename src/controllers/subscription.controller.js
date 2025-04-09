@@ -5,12 +5,13 @@ import { SubscriptionModel } from "../models/subscription.model.js"
 
 const toggleSubscription = asyncHandler(async (req, res) => {
     // TODO: toggle subscription
-    const {channelId} = req.params
+    const { channelId } = req.params
     const subscriberId = req.user?._id
 
     if (subscriberId.toString() === channelId.toString()) {
         throw new ApiError(400, "You cannot subscribe to yourself");
     }
+    
     const alreadySubscribed = await SubscriptionModel.findOne({
         channel: channelId,
         subscriber: subscriberId
