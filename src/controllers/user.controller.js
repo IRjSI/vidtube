@@ -150,4 +150,86 @@ const refreshAccessToken = asyncHandler(async (req,res) => {
     }
 })
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken };
+const updatePassword = asyncHandler(async (req,res) => {
+    const { oldPassword, newPassword } = req.body;
+
+    const user = await UserModel.findById(req.user?._id);
+    
+    const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+    if (!isPasswordCorrect) {
+        throw new ApiError(401, 'Incorrect password')
+    }
+
+    user.password = newPassword; // we have implemented hashing in "pre" hook in UserModel
+    await user.save({ validateBeforeSave: false });
+
+    return res.status(200).json(new ApiResponse(201, {}, 'Password updated Successfully'))
+})
+
+const getUser = asyncHandler(async (req,res) => {
+    return res.status(200).json(new ApiResponse(200, req.user, 'user details'))
+})
+
+const updateDetails = asyncHandler(async (req,res) => {
+    const { fullname, email } = req.body;
+    if (!fullname || !email) {
+        throw new ApiError(400, 'fullname and email are required')
+    }
+
+    const user = await UserModel.findByIdAndUpdate(
+        req.user?._id, 
+        {
+            $set: {
+                fullname,
+                email
+            }
+        },
+        { new: true }
+    );
+
+    return res.status(200).json(new ApiResponse(200, user, 'Account details updated'))
+})
+
+const updateAvatar = asyncHandler(async (req,res) => {
+    const avatarLocalPath = req.file?.path;
+    if (!avatarLocalPath) {
+        throw new ApiError(400, 'File is required');
+    }
+
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
+
+    if (!avatar.url) {
+        throw new ApiError(500, 'Something went wrong while uploading avatar')
+    }
+
+    const user = await UserModel.findByIdAndUpdate(req.user?._id, {
+        $set: {
+            avatar: avatar.url
+        }
+    }, { new: true });
+
+    return res.status(200).json(new ApiResponse(200, user, 'Avatar updated'))
+})
+
+const updateCoverImage = asyncHandler(async (req,res) => {
+    const coverImageLocalPath = req.file?.path;
+    if (!coverImageLocalPath) {
+        throw new ApiError(400, 'File is required');
+    }
+
+    const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+
+    if (!coverImage.url) {
+        throw new ApiError(500, 'Something went wrong while uploading avatar')
+    }
+
+    const user = await UserModel.findByIdAndUpdate(req.user?._id, {
+        $set: {
+            coverImage: coverImage.url
+        }
+    }, { new: true });
+
+    return res.status(200).json(new ApiResponse(200, user, 'cover Image updated'))
+})
+
+export { registerUser, loginUser, logoutUser, refreshAccessToken, updateCoverImage, updateAvatar, updateDetails, getUser, updatePassword };
