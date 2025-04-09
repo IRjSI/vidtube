@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import router from "./routes/healthCheck.route.js";
 import userRouter from "./routes/user.route.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
+import videoRouter from "./routes/video.route.js";
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(cookieParser());
 
 app.use('/api/v1/healthcheck',router);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/videos', videoRouter);
 
 app.use(errorHandler);
 export { app };
