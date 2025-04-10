@@ -33,11 +33,12 @@ const publishAVideo = asyncHandler(async (req, res) => {
     // create video
 
     const newVideo = await VideoModel.create({
-        videoFile: video,
-        thumbnail,
+        videoFile: video.url,
+        thumbnail: thumbnail.url,
         title,
         description,
-        owner: req.user._id
+        duration: video.duration,
+        owner: req.user?._id
     })
 
     return res.status(200).json(new ApiResponse(201, newVideo, 'Video uploaded'))
