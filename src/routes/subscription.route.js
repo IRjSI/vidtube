@@ -5,7 +5,7 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 const subscriptionRouter = express.Router();
 
 subscriptionRouter.get('/get-subscribers/:channelId', verifyJWT, getUserChannelSubscribers);
-subscriptionRouter.get('/get-channels/:subscriberId', verifyJWT, getSubscribedChannels);
+subscriptionRouter.get('/get-channels', verifyJWT, getSubscribedChannels);
 subscriptionRouter.patch('/toggle/:channelId', verifyJWT, toggleSubscription);
 
 export default subscriptionRouter;

@@ -26,7 +26,7 @@ const generateAccessAndRefreshToken = async (userId) => {
 }
 
 const registerUser = asyncHandler(async (req,res) => {
-    const { username, fullname, password, email } = req.body; 
+    const { username, fullname, password, email } = req.body;
     //images(avatar and coverImage) are not coming through 'body' it is coming from 'req.files', handled with multer
     const existing = await UserModel.findOne({
         $or: [ { username } , { email } ]
@@ -62,8 +62,8 @@ const registerUser = asyncHandler(async (req,res) => {
 })
 
 const loginUser = asyncHandler(async (req,res) => {
-    const { username, email, password } = req.body
-
+    const { username, password, email } = req.body;
+    
     const user = await UserModel.findOne({
         $or: [{ username }, { email }]
     })
@@ -71,7 +71,7 @@ const loginUser = asyncHandler(async (req,res) => {
         throw new ApiError(404, 'user not found')
     }
 
-    const isMatch = await UserModel.isPasswordCorrect(password)
+    const isMatch = await user.isPasswordCorrect(password)
     if (!isMatch) {
         throw new ApiError(401, 'Invalid creds')
     }
@@ -83,7 +83,7 @@ const loginUser = asyncHandler(async (req,res) => {
         secure: process.env.NODE_ENV === 'production'
     }
 
-    return res.status(200).cookie('accessToken', accessToken, options).cookie('refreshToken', refreshToken, options).json(new ApiResponse(200, { user }, 'user logged in'))
+    return res.status(200).cookie('accessToken', accessToken, options).cookie('refreshToken', refreshToken, options).json(new ApiResponse(200, user, 'user logged in'))
 })
 
 const logoutUser = asyncHandler(async (req,res) => {

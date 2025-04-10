@@ -11,7 +11,10 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
         likedBy: req.user?._id
     })
     if (alreadyLiked) {
-        await LikeModel.findByIdAndDelete(videoId)
+        await LikeModel.deleteOne({
+            video: videoId,
+            likedBy: req.user?._id
+        });
     } else {
         await LikeModel.create({
             video: videoId,
