@@ -8,6 +8,8 @@ import videoRouter from "./routes/video.route.js";
 import tweetRouter from "./routes/tweet.route.js";
 import subscriptionRouter from "./routes/subscription.route.js";
 import playlistRouter from "./routes/playlist.route.js";
+import likeRouter from "./routes/like.route.js";
+import commentRouter from "./routes/comment.route.js";
 
 const app = express();
 
@@ -23,6 +25,8 @@ app.use('/api/v1/videos', videoRouter);
 app.use('/api/v1/tweet', tweetRouter);
 app.use('/api/v1/subscription', subscriptionRouter);
 app.use('/api/v1/playlist', playlistRouter);
+app.use('/api/v1/like', likeRouter);
+app.use('/api/v1/comment', commentRouter);
 
 app.use(errorHandler);
 export { app };
