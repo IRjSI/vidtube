@@ -9,6 +9,9 @@ const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
     //TODO: get all videos based on query, sort, pagination
     const videos = await VideoModel.find({ owner: req.user?._id });
+    if (videos) {
+        throw new ApiError(404, 'videos not found')
+    }
 
     return res.status(200).json(new ApiResponse(200, videos, 'All videos'))
 })
@@ -21,7 +24,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
     const videoLocalPath = req.files?.video?.[0]?.path
     const thumbnailLocalPath = req.files?.thumbnail?.[0]?.path
-    if (!videoLocalPath) {
+    if (!videoLocalPath || !thumbnailLocalPath) {
         throw new ApiError(400, 'Video file required')
     }
 
@@ -40,6 +43,9 @@ const publishAVideo = asyncHandler(async (req, res) => {
         duration: video.duration,
         owner: req.user?._id
     })
+    if (!newVideo) {
+        throw new ApiError(400, 'Error creating video')
+    }
 
     return res.status(200).json(new ApiResponse(201, newVideo, 'Video uploaded'))
 })
@@ -60,6 +66,9 @@ const updateVideo = asyncHandler(async (req, res) => {
     //TODO: update video details like title, description, thumbnail
     const { title, description } = req.body;
     const thumbnailLocalPath = req.file?.path;
+    if (!thumbnailLocalPath) {
+        throw new ApiError(400, 'thumbnail file required')
+    }
 
     const thumbnail = await uploadOnCloudinary(thumbnailLocalPath);
     if (!thumbnail.url) {
@@ -73,6 +82,9 @@ const updateVideo = asyncHandler(async (req, res) => {
             thumbnail: thumbnail.url
         }
     }, { new: true });
+    if (!video) {
+        throw new ApiError(404, 'video not found')
+    }
 
     return res.status(200).json(new ApiResponse(200, video, 'Video updated'))
 })
@@ -94,6 +106,9 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
             isPublished: status
         }
     }, { new: true })
+    if (video) {
+        throw new ApiError(404, 'video not found')
+    }
 
     return res.status(200).json(new ApiResponse(200, video, 'toggled'))
 })
