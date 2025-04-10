@@ -1,10 +1,10 @@
 import jwt from "jsonwebtoken";
-import { asyncHandler } from "../utils/asyncHandler";
-import { ApiError } from "../utils/ApiError";
-import UserModel from "../models/user.model";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
+import UserModel from "../models/user.model.js";
 
 export const verifyJWT = asyncHandler(async (req,res,next) => {
-    const token = req.cookie.accessToken || req.header('Authorization')?.replace('Beared ', '');
+    const token = req.cookies.accessToken || req.header('Authorization')?.replace('Beared ', '');
     if (!token) {
         throw new ApiError(401, 'Unauth')
     }
