@@ -4,6 +4,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "start": "node src/index.js",
+    "build": "echo \"No build step defined\"",
     "dev": "nodemon --watch src --exec node src/index.js"
   },
   "keywords": [],
