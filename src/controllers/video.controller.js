@@ -4,13 +4,28 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import VideoModel from "../models/video.model.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
+import { SubscriptionModel } from "../models/subscription.model.js"
 
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
     //TODO: get all videos based on query, sort, pagination
-    console.log(req.user._id);
-    
-    const videos = await VideoModel.find({ owner: req.user?._id });
+    const channels = await SubscriptionModel.find({ subscriber: req.user?._id }).select("channel");
+
+    const videos = await VideoModel.aggregate([
+        {
+            "$match": {
+                "owner": { $in: channels.map(channel => channel.channel) }
+            }
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "owner",
+                "foreignField": "_id",
+                "as": "user"
+            }
+        }
+    ]);
     if (!videos || videos.length === 0) {
         throw new ApiError(404, 'videos not found')
     }
