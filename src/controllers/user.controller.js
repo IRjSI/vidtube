@@ -170,6 +170,17 @@ const getUser = asyncHandler(async (req,res) => {
     return res.status(200).json(new ApiResponse(200, req.user, 'user details'))
 })
 
+const getUserByQuery = asyncHandler(async (req,res) => {
+    const { username } = req.params;
+    if (!username) {
+        throw new ApiError(400, 'username must be provided')
+    }
+
+    const user = await UserModel.find({ username });
+
+    return res.status(200).json(new ApiResponse(201, user, 'user found'))
+})
+
 const updateDetails = asyncHandler(async (req,res) => {
     const { fullname, email } = req.body;
     if (!fullname || !email) {
@@ -232,4 +243,4 @@ const updateCoverImage = asyncHandler(async (req,res) => {
     return res.status(200).json(new ApiResponse(200, user, 'cover Image updated'))
 })
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken, updateCoverImage, updateAvatar, updateDetails, getUser, updatePassword };
+export { registerUser, loginUser, logoutUser, refreshAccessToken, updateCoverImage, updateAvatar, updateDetails, getUser, updatePassword, getUserByQuery };

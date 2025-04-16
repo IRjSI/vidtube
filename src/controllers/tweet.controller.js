@@ -2,6 +2,7 @@ import { ApiError } from "../utils/ApiError.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { TweetModel } from "../models/tweet.model.js"
+import { SubscriptionModel } from "../models/subscription.model.js"
 
 const createTweet = asyncHandler(async (req, res) => {
     //TODO: create tweet
@@ -25,6 +26,32 @@ const getUserTweets = asyncHandler(async (req, res) => {
         throw new ApiError(404, 'no tweets found')
     }
     
+    return res.status(200).json(new ApiResponse(200, tweets, 'All tweets'))
+})
+
+const getAllTweets = asyncHandler(async (req, res) => {
+    // TODO: get user tweets
+    const channels = await SubscriptionModel.find({ subscriber: req.user?._id }).select("channel");
+
+    const tweets = await TweetModel.aggregate([
+        {
+            "$match": {
+                "owner": { $in: channels.map(channel => channel.channel) }
+            }
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "owner",
+                "foreignField": "_id",
+                "as": "user"
+            }
+        }
+    ]);
+    if (!tweets || tweets.length === 0) {
+        throw new ApiError(404, 'tweets not found')
+    }
+
     return res.status(200).json(new ApiResponse(200, tweets, 'All tweets'))
 })
 
@@ -55,6 +82,7 @@ const deleteTweet = asyncHandler(async (req, res) => {
 
 export {
     createTweet,
+    getAllTweets,
     getUserTweets,
     updateTweet,
     deleteTweet
