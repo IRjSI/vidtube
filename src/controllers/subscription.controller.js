@@ -18,13 +18,13 @@ const toggleSubscription = asyncHandler(async (req, res) => {
         subscriber: subscriberId
     })
     if (alreadySubscribed) {
-        await SubscriptionModel.findByIdAndDelete(alreadySubscribed._id)
+        const unsubscribed = await SubscriptionModel.findByIdAndDelete(alreadySubscribed._id)
 
-        return res.status(200).json(new ApiResponse(200, {}, "Unsubscribed successfully"))
+        return res.status(200).json(new ApiResponse(200, unsubscribed, "Unsubscribed successfully"))
     } else {
         const newSubcriber = await SubscriptionModel.create({
-            subscriber: subscriberId,
-            channel: channelId
+            channel: channelId,
+            subscriber: subscriberId
         })
         
         return res.status(200).json(new ApiResponse(201, newSubcriber, "Unsubscribed successfully"))
