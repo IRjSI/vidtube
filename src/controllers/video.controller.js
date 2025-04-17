@@ -69,8 +69,23 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
 const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params
+    
     //TODO: get video by id
-    const video = await VideoModel.findById(videoId);
+    const video = await VideoModel.aggregate([
+        {
+            "$match": {
+                "_id": new mongoose.Types.ObjectId(videoId)
+            }
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "owner",
+                "foreignField": "_id",
+                "as": "user"
+            }
+        }
+    ]);
     if (!video) {
         throw new ApiError(400, 'no video found')
     }

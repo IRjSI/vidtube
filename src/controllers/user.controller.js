@@ -177,6 +177,10 @@ const getUserByQuery = asyncHandler(async (req,res) => {
     }
 
     const user = await UserModel.find({ username });
+    
+    if (!user.length) {
+        throw new ApiError(404, 'User does not exists')
+    }
 
     return res.status(200).json(new ApiResponse(201, user, 'user found'))
 })
