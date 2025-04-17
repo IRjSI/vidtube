@@ -10,9 +10,9 @@ const toggleSubscription = asyncHandler(async (req, res) => {
     const subscriberId = req.user?._id
 
     if (subscriberId.toString() === channelId.toString()) {
-        throw new ApiError(400, "You cannot subscribe to yourself");
+        return res.json(new ApiResponse(201, {}, "can't subscribe yourself"))
     }
-    
+
     const alreadySubscribed = await SubscriptionModel.findOne({
         channel: channelId,
         subscriber: subscriberId
@@ -27,7 +27,7 @@ const toggleSubscription = asyncHandler(async (req, res) => {
             subscriber: subscriberId
         })
         
-        return res.status(200).json(new ApiResponse(201, newSubcriber, "Unsubscribed successfully"))
+        return res.status(200).json(new ApiResponse(201, newSubcriber, "Subscribed successfully"))
     }
 })
 
