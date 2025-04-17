@@ -39,6 +39,22 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, subscribers, 'Subscribers list'))
 })
 
+const getSubscribeStatus = asyncHandler(async (req,res) => {
+    const { channelId } = req.params
+    const subscriberId = req.user?._id
+
+    const alreadySubscribed = await SubscriptionModel.findOne({
+        channel: channelId,
+        subscriber: subscriberId
+    })
+
+    if (alreadySubscribed) {
+        return res.status(200).json(new ApiResponse(201, { message: true }, "Subscribed"))
+    } else {
+        return res.status(200).json(new ApiResponse(201, { message: false }, "Not subscribed"))
+    }
+})
+
 // controller to return channel list to which user has subscribed
 const getSubscribedChannels = asyncHandler(async (req, res) => {
     const subscriberId = req.user._id
@@ -70,5 +86,6 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
 export {
     toggleSubscription,
     getUserChannelSubscribers,
-    getSubscribedChannels
+    getSubscribedChannels,
+    getSubscribeStatus
 }
