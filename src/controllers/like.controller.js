@@ -4,7 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 
 const toggleVideoLike = asyncHandler(async (req, res) => {
-    const {videoId} = req.params
+    const { videoId } = req.params
     //TODO: toggle like on video
     const alreadyLiked = await LikeModel.findOne({
         video: videoId,
@@ -30,6 +30,19 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
     const videoLiked = isVideoLiked ? true : false
 
     return res.status(200).json(new ApiResponse(200, { videoLiked }, 'video liked/unliked'))
+})
+
+const videoLikeStatus = asyncHandler(async (req,res) => {
+    const { videoId } = req.params
+    const alreadyLiked = await LikeModel.findOne({
+        video: videoId,
+        likedBy: req.user?._id
+    })
+    if (alreadyLiked) {
+        return res.status(200).json(new ApiResponse(200, { message: true }, 'video is already liked'))
+    } else {
+        return res.status(200).json(new ApiResponse(200, { message: false }, 'video is not liked'))
+    }
 })
 
 const toggleCommentLike = asyncHandler(async (req, res) => {
@@ -96,5 +109,6 @@ export {
     toggleCommentLike,
     toggleTweetLike,
     toggleVideoLike,
-    getLikedVideos
+    getLikedVideos,
+    videoLikeStatus
 }
