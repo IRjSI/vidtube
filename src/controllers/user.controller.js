@@ -176,7 +176,7 @@ const getUserByQuery = asyncHandler(async (req,res) => {
         throw new ApiError(400, 'username must be provided')
     }
 
-    const user = await UserModel.find({ username });
+    const user = await UserModel.find({ username: {$regex: username, $options: "i"} });
     
     if (!user.length) {
         throw new ApiError(404, 'User does not exists')

@@ -33,6 +33,26 @@ const getAllVideos = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, videos, 'All videos'))
 })
 
+const getMyVideos = asyncHandler(async (req,res) => {
+    const videos = await VideoModel.aggregate([
+        {
+            "$match": {
+                "owner": req.user?._id
+            }
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "owner",
+                "foreignField": "_id",
+                "as": "user"
+            }
+        }
+    ]);
+
+    return res.status(200).json(new ApiResponse(200, videos, 'All my videos'))
+})
+
 const publishAVideo = asyncHandler(async (req, res) => {
     const { title, description } = req.body
     // TODO: get video, upload to cloudinary, create video
@@ -147,6 +167,7 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
 
 export {
     getAllVideos,
+    getMyVideos,
     publishAVideo,
     getVideoById,
     updateVideo,
