@@ -1,5 +1,5 @@
 import express from "express";
-import { getUser, getUserByQuery, loginUser, logoutUser, refreshAccessToken, registerUser, updateAvatar, updateCoverImage, updateDetails, updatePassword } from "../controllers/user.controller.js";
+import { getUser, getUserByQuery, googleLogin, loginUser, logoutUser, refreshAccessToken, registerUser, updateAvatar, updateCoverImage, updateDetails, updatePassword } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -17,6 +17,7 @@ userRouter.post('/register', upload.fields([
     }
 ]), registerUser);
 userRouter.post('/login', loginUser);
+userRouter.post('/auth', googleLogin);
 userRouter.post('/refresh-token', refreshAccessToken);
 
 userRouter.post('/logout', verifyJWT, logoutUser);

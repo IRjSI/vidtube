@@ -100,7 +100,30 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
 
 const getLikedVideos = asyncHandler(async (req, res) => {
     //TODO: get all liked videos
-    const allLikedVideos = await LikeModel.find({ likedBy: req.user?._id }).select("-tweet -comment")
+    const allLikedVideos = await LikeModel.aggregate([
+        {
+            "$match": {
+                "likedBy": req.user?._id
+            }
+        },
+        {
+            "$lookup": {
+                "from": "videos",
+                "localField": "video",
+                "foreignField": "_id",
+                "as": "video"
+            }
+        },
+        {
+            "$unwind": "$video"
+        },
+        {
+            "$project": {
+                "_id": 0,
+                "video": 1
+            }
+        }
+    ])
 
     return res.status(200).json(new ApiResponse(200, allLikedVideos, 'all liked videos'))
 })
