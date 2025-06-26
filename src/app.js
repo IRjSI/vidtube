@@ -14,7 +14,7 @@ import commentRouter from "./routes/comment.route.js";
 const app = express();
 
 app.use(cors({
-    origin: ['https://vidtube-fe.vercel.app', 'http://localhost:5173'],  // your FE origin
+    origin: ['https://vidtube-fe.vercel.app', 'http://localhost:5173', 'https://vidtubebe.onrender.com'],  // your FE origin
     credentials: true
   }));
 app.use(express.json());
