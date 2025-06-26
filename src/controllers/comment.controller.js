@@ -5,13 +5,17 @@ import { asyncHandler } from "../utils/asyncHandler.js"
 
 const getVideoComments = asyncHandler(async (req, res) => {
     //TODO: get all comments for a video
-    const {videoId} = req.params
-    const {page = 1, limit = 10} = req.query
+    const { videoId } = req.params
     
+    const comments = await CommentModel.find({ video: videoId }).populate('owner');
+    if (!comments) {
+        return res.json(new ApiResponse(404, 'comments not found'))
+    }
+
+    return res.json(new ApiResponse(200, comments, 'comment found'))
 })
 
 const addComment = asyncHandler(async (req, res) => {
-    // TODO: add a comment to a video
     const { content } = req.body
     const { videoId } = req.params
     const newComment = await CommentModel.create({

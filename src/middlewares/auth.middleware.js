@@ -11,10 +11,11 @@ export const verifyJWT = asyncHandler(async (req,res,next) => {
     }
     try {
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+        
         const user = await UserModel.findById(decodedToken?._id);
         if (!user) {
             throw new ApiError(401, 'unautho')
-        }
+        }        
 
         req.user = user;
         next()
