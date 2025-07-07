@@ -1,3 +1,5 @@
+import { FriendModel } from "../models/friend.model.js";
+import { MessageModel } from "../models/message.model.js";
 import UserModel from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -119,6 +121,7 @@ const refreshAccessToken = asyncHandler(async (req,res) => {
     try {
         const decodedToken = jwt.verify(incomingRefreshToken, process.env.JWT_SECRET);
         const user = await UserModel.findById(decodedToken?._id);
+        console.log(user)
         if (!user) {
             throw new ApiError(401, 'invalid refresh token');
         }
@@ -172,6 +175,21 @@ const getUser = asyncHandler(async (req,res) => {
 
 const getUserByQuery = asyncHandler(async (req,res) => {
     const { username } = req.params;
+    if (!username) {
+        throw new ApiError(400, 'username must be provided')
+    }
+
+    const user = await UserModel.find({ username: {$regex: username, $options: "i"} });
+    
+    if (!user.length) {
+        throw new ApiError(404, 'User does not exists')
+    }
+
+    return res.status(200).json(new ApiResponse(201, user, 'user found'))
+})
+
+const getUserBySearch = asyncHandler(async (req,res) => {
+    const { username } = req.body;
     if (!username) {
         throw new ApiError(400, 'username must be provided')
     }
@@ -247,4 +265,121 @@ const updateCoverImage = asyncHandler(async (req,res) => {
     return res.status(200).json(new ApiResponse(200, user, 'cover Image updated'))
 })
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken, updateCoverImage, updateAvatar, updateDetails, getUser, updatePassword, getUserByQuery };
+const addFriend = asyncHandler(async (req,res) => {
+    const { friendId } = req.params
+    const userId = req.user?._id
+
+    if (userId.toString() === friendId.toString()) {
+        return res.json(new ApiResponse(201, {}, "can't add yourself"))
+    }
+
+    const alreadyFriend = await FriendModel.findOne({
+        friend: friendId,
+        user: userId
+    })
+    if (alreadyFriend) {
+        const remove = await FriendModel.findByIdAndDelete(alreadyFriend._id)
+
+        return res.status(200).json(new ApiResponse(200, remove, "removed successfully"))
+    } else {
+        const newFriend = await FriendModel.create({
+            friend: friendId,
+            user: userId
+        })
+        
+        return res.status(200).json(new ApiResponse(201, newFriend, "added successfully"))
+    }
+})
+
+const friendStatus = asyncHandler(async (req,res) => {
+    const { friendId } = req.params
+    const userId = req.user?._id
+
+    const alreadyFriend = await FriendModel.findOne({
+        friend: friendId,
+        user: userId
+    })
+
+    if (alreadyFriend) {
+        return res.status(200).json(new ApiResponse(201, { message: true }, "Added"))
+    } else {
+        return res.status(200).json(new ApiResponse(201, { message: false }, "removed"))
+    }
+})
+
+const getFriends = asyncHandler(async (req, res) => {
+    const userId = req.user._id
+    const friends = await FriendModel.aggregate([
+        {
+            "$match": {
+                "user": userId
+            }
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "friend",
+                "foreignField": "_id",
+                "as": "user"
+            }
+        },
+        {
+            "$project": {
+                "user._id": 1,
+                "user.username": 1,
+                "user.avatar": 1
+            }
+        }
+    ])
+    
+    return res.status(200).json(new ApiResponse(200, friends, 'friends list'))
+})
+
+
+const getMessages = asyncHandler(async (req, res) => {
+    //TODO: get all comments for a video
+    const { roomId } = req.params
+    
+    const messages = await MessageModel.find({ room: roomId }).sort({ createdAt: 1 });
+    if (!messages) {
+        return res.json(new ApiResponse(404, 'messages not found'))
+    }
+
+    return res.json(new ApiResponse(200, messages, 'messages found'))
+})
+
+const addMessage = asyncHandler(async (req, res) => {
+    const { content } = req.body
+    const { friendId } = req.params
+    const newMessage = await MessageModel.create({
+        content,
+        friend: friendId,
+        user: req.user?._id,
+        room: [friendId, req.user?._id].sort().join("-")
+    })
+    
+    return res.json(new ApiResponse(201, newMessage, 'message added'))
+})
+
+const updateMessage = asyncHandler(async (req, res) => {
+    // TODO: update a comment
+    const { messageId } = req.params
+    const { newContent } = req.body
+    const message = await MessageModel.findOneAndUpdate({ _id: messageId }, {
+        $set: {
+            content: newContent
+        }
+    }, { new: true })
+    
+    return res.json(new ApiResponse(200, message, 'message update'))
+})
+
+const deleteMessage = asyncHandler(async (req, res) => {
+    // TODO: delete a comment
+    const { messageId } = req.params
+    await MessageModel.findOneAndDelete({ _id: messageId })
+    
+    return res.json(new ApiResponse(200, {}, 'message deleted'))
+})
+
+export { registerUser, loginUser, logoutUser, refreshAccessToken, updateCoverImage, updateAvatar, updateDetails, getUser, updatePassword, getUserByQuery, getUserBySearch, addFriend, friendStatus, getFriends, getMessages, addMessage, deleteMessage, updateMessage };
