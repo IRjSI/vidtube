@@ -9,7 +9,6 @@ export default function socketHandler(io) {
 
     socket.on("message", async ({ room, message, userId, friendId }) => {
       try {
-        // 1️⃣ Save the message to MongoDB
         const newMessage = await MessageModel.create({
           content: message,
           friend: friendId,
@@ -17,11 +16,10 @@ export default function socketHandler(io) {
           room: room
         });
 
-        // 2️⃣ Broadcast the new message to others in the room
         io.to(room).emit("newMessage", {
-          message: newMessage.content, // or send whole object if needed
-          user: newMessage.user,       // optional: sender info
-          createdAt: newMessage.createdAt // optional: timestamp
+          message: newMessage.content,
+          user: newMessage.user,
+          createdAt: newMessage.createdAt
         });
 
       } catch (err) {

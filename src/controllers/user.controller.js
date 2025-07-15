@@ -223,6 +223,25 @@ const updateDetails = asyncHandler(async (req,res) => {
     return res.status(200).json(new ApiResponse(200, user, 'Account details updated'))
 })
 
+const updateDescription = asyncHandler(async (req,res) => {
+    const { oldDescription, newDescription } = req.body;
+    if (!oldDescription || !newDescription) {
+        throw new ApiError(400, 'oldDescription and newDescription are required')
+    }
+
+    const user = await UserModel.findByIdAndUpdate(
+        req.user?._id, 
+        {
+            $set: {
+                description: newDescription
+            }
+        },
+        { new: true }
+    );
+
+    return res.status(200).json(new ApiResponse(200, user, 'Account details(desc) updated'))
+})
+
 const updateAvatar = asyncHandler(async (req,res) => {
     const avatarLocalPath = req.file?.path;
     if (!avatarLocalPath) {
@@ -337,7 +356,6 @@ const getFriends = asyncHandler(async (req, res) => {
 
 
 const getMessages = asyncHandler(async (req, res) => {
-    //TODO: get all comments for a video
     const { roomId } = req.params
     
     const messages = await MessageModel.find({ room: roomId }).sort({ createdAt: 1 });
@@ -348,38 +366,4 @@ const getMessages = asyncHandler(async (req, res) => {
     return res.json(new ApiResponse(200, messages, 'messages found'))
 })
 
-const addMessage = asyncHandler(async (req, res) => {
-    const { content } = req.body
-    const { friendId } = req.params
-    const newMessage = await MessageModel.create({
-        content,
-        friend: friendId,
-        user: req.user?._id,
-        room: [friendId, req.user?._id].sort().join("-")
-    })
-    
-    return res.json(new ApiResponse(201, newMessage, 'message added'))
-})
-
-const updateMessage = asyncHandler(async (req, res) => {
-    // TODO: update a comment
-    const { messageId } = req.params
-    const { newContent } = req.body
-    const message = await MessageModel.findOneAndUpdate({ _id: messageId }, {
-        $set: {
-            content: newContent
-        }
-    }, { new: true })
-    
-    return res.json(new ApiResponse(200, message, 'message update'))
-})
-
-const deleteMessage = asyncHandler(async (req, res) => {
-    // TODO: delete a comment
-    const { messageId } = req.params
-    await MessageModel.findOneAndDelete({ _id: messageId })
-    
-    return res.json(new ApiResponse(200, {}, 'message deleted'))
-})
-
-export { registerUser, loginUser, logoutUser, refreshAccessToken, updateCoverImage, updateAvatar, updateDetails, getUser, updatePassword, getUserByQuery, getUserBySearch, addFriend, friendStatus, getFriends, getMessages, addMessage, deleteMessage, updateMessage };
+export { registerUser, loginUser, logoutUser, refreshAccessToken, updateCoverImage, updateAvatar, updateDetails, getUser, updatePassword, getUserByQuery, getUserBySearch, addFriend, friendStatus, getFriends, getMessages, updateDescription };
