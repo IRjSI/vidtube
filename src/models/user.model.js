@@ -66,7 +66,6 @@ userSchema.methods.generateAccessToken = function() {
 }
 
 userSchema.methods.generateRefreshToken = function() {
-    // short lived token
     return jwt.sign({
         _id: this._id
     }, process.env.JWT_SECRET,{ expiresIn: process.env.REFRESH_TOKEN_EXPIRY })
