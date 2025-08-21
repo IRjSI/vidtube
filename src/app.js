@@ -10,27 +10,28 @@ import subscriptionRouter from "./routes/subscription.route.js";
 import playlistRouter from "./routes/playlist.route.js";
 import likeRouter from "./routes/like.route.js";
 import commentRouter from "./routes/comment.route.js";
+// for web socket
 import { Server } from 'socket.io';
+import { createServer } from 'node:http';
+import socketHandler from "./ws/index.js";
 
 const app = express();
 
 app.use(cors({
-    origin: ['https://vidtube-fe.vercel.app', 'http://localhost:5173', 'https://vidtubebe.onrender.com'],  // your FE origin
-    credentials: true
-  }));
+  origin: ['https://vidtube-fe.vercel.app', 'http://localhost:5173'],
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use(cookieParser());
 
-import { createServer } from 'node:http';
-import socketHandler from "./ws/index.js";
 
 const server = createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: ['https://vidtube-fe.vercel.app', 'http://localhost:5173', 'https://vidtubebe.onrender.com'],
+    origin: ['https://vidtube-fe.vercel.app', 'http://localhost:5173'],
     credentials: true,
     methods: ["GET", "POST"]
   }
@@ -47,5 +48,5 @@ app.use('/api/v1/playlists', playlistRouter);
 app.use('/api/v1/likes', likeRouter);
 app.use('/api/v1/comments', commentRouter);
 
-app.use(errorHandler);
+app.use(errorHandler); // need to study
 export { app, server };

@@ -1,13 +1,23 @@
 import express from "express";
-import { addView, deleteVideo, getAllVideos, getMyVideos, getVideoById, publishAVideo, togglePublishStatus, updateVideo } from "../controllers/video.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
+import {
+    addView,
+    deleteVideo,
+    getAllVideos,
+    getMyVideos,
+    getVideoById,
+    publishAVideo,
+    togglePublishStatus,
+    updateVideo
+} from "../controllers/video.controller.js";
 
 const videoRouter = express.Router();
 
-videoRouter.get('/get-videos', verifyJWT, getAllVideos);
-videoRouter.get('/get-my-videos', verifyJWT, getMyVideos);
-videoRouter.post('/upload-video', verifyJWT, upload.fields([
+// middleware for all routes
+videoRouter.use(verifyJWT);
+
+videoRouter.post('/upload-video', upload.fields([
     {
         name: "video",
         maxCount: 1
@@ -17,10 +27,13 @@ videoRouter.post('/upload-video', verifyJWT, upload.fields([
         maxCount: 1
     }
 ]), publishAVideo);
-videoRouter.get('/get-video/:videoId', verifyJWT, getVideoById);
-videoRouter.patch('/update-video/:videoId', verifyJWT, upload.single('thumbnail'), updateVideo);
-videoRouter.delete('/delete-video/:videoId', verifyJWT, deleteVideo);
-videoRouter.patch('/publish/:videoId', verifyJWT, togglePublishStatus);
-videoRouter.patch('/inc-view/:videoId', verifyJWT, addView);
+videoRouter.get('/get-videos', getAllVideos);
+videoRouter.get('/get-my-videos', getMyVideos);
+videoRouter.get('/get-video/:videoId', getVideoById);
+videoRouter.patch('/update-video/:videoId', upload.single('thumbnail'), updateVideo);
+videoRouter.delete('/delete-video/:videoId', deleteVideo);
+videoRouter.patch('/publish/:videoId', togglePublishStatus);
+
+videoRouter.patch('/inc-view/:videoId', addView);
 
 export default videoRouter;

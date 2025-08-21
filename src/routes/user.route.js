@@ -1,11 +1,28 @@
 import express from "express";
-import { addFriend, friendStatus, getFriends, getMessages, getUser, getUserByQuery, getUserBySearch, loginUser, logoutUser, refreshAccessToken, registerUser, updateAvatar, updateCoverImage, updateDescription, updateDetails, updatePassword } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { 
+    registerUser,
+    loginUser,
+    logoutUser,
+    refreshAccessToken,
+    updateAvatar,
+    updateCoverImage,
+    updateDescription,
+    updateDetails,
+    updatePassword,
+    getUser,
+    getUserByQuery,
+    getUserBySearch,
+    getFriends,
+    addFriend,
+    friendStatus,
+    getMessages
+} from "../controllers/user.controller.js";
 
 const userRouter = express.Router();
 
-// we also want avatar and coverImage
+// authentication routes
 userRouter.post('/register', upload.fields([
     {
         name: "avatar",
@@ -17,22 +34,29 @@ userRouter.post('/register', upload.fields([
     }
 ]), registerUser);
 userRouter.post('/login', loginUser);
+userRouter.post('/logout', verifyJWT, logoutUser);
 userRouter.post('/refresh-token', refreshAccessToken);
 
-userRouter.post('/logout', verifyJWT, logoutUser);
-userRouter.post('/change-password', verifyJWT, updatePassword);
-userRouter.get('/get-user', verifyJWT, getUser);
-userRouter.get('/get-user-search/:username', verifyJWT, getUserByQuery);
-userRouter.get('/get-user-by-search', verifyJWT, getUserBySearch);
-userRouter.patch('/add-friend/:friendId', verifyJWT, addFriend);
-userRouter.get('/get-friend-status/:friendId', verifyJWT, friendStatus);
-userRouter.get('/get-friends', verifyJWT, getFriends);
-userRouter.post('/update-details', verifyJWT, updateDetails);
-userRouter.patch('/update-details', verifyJWT, updateDetails);
-userRouter.patch('/update-description', verifyJWT, updateDescription);
-userRouter.patch('/update-avatar', verifyJWT, upload.single('avatar'), updateAvatar);
-userRouter.patch('/update-cover-image', verifyJWT, upload.single('coverImage'), updateCoverImage);
+// middleware for all routes
+userRouter.use(verifyJWT);
 
-userRouter.get('/get-messages/:roomId', verifyJWT, getMessages);
+// profile routes
+userRouter.get('/get-user', getUser);
+userRouter.get('/get-user-search/:username', getUserByQuery);
+userRouter.get('/get-user-by-search', getUserBySearch);
+
+// profile updation routes
+userRouter.post('/update-details', updateDetails);
+userRouter.patch('/update-details', updateDetails);
+userRouter.patch('/update-description', updateDescription);
+userRouter.patch('/update-avatar', upload.single('avatar'), updateAvatar);
+userRouter.patch('/update-cover-image', upload.single('coverImage'), updateCoverImage);
+userRouter.post('/change-password', updatePassword);
+
+// chat-app routes
+userRouter.patch('/add-friend/:friendId', addFriend);
+userRouter.get('/get-friend-status/:friendId', friendStatus);
+userRouter.get('/get-friends', getFriends);
+userRouter.get('/get-messages/:roomId', getMessages);
 
 export default userRouter;

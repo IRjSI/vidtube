@@ -18,7 +18,7 @@ const generateAccessAndRefreshToken = async (userId) => {
         const refreshToken = user.generateRefreshToken()
     
         user.refreshToken = refreshToken
-        await user.save({ ValidityBeforeSave: false })
+        await user.save({ ValidateBeforeSave: false })
     
         return { accessToken, refreshToken };
     } catch (error) {
@@ -29,7 +29,6 @@ const generateAccessAndRefreshToken = async (userId) => {
 
 const registerUser = asyncHandler(async (req,res) => {
     const { username, fullname, password, email } = req.body;
-    //images(avatar and coverImage) are not coming through 'body' it is coming from 'req.files', handled with multer
     const existing = await UserModel.findOne({
         $or: [ { username } , { email } ]
     })
@@ -37,7 +36,7 @@ const registerUser = asyncHandler(async (req,res) => {
         throw new ApiError(409, 'user already exists')
     }
 
-    const avatarLocalPath = req.files?.avatar?.[0]?.path
+    const avatarLocalPath = req.files?.avatar?.[0]?.path // WHY [0]
     const coverImageLocalPath = req.files?.coverImage?.[0]?.path
 
     if (!avatarLocalPath) {
@@ -103,7 +102,7 @@ const logoutUser = asyncHandler(async (req,res) => {
 
     const options = {
         httpOnly: true,
-        secure: process.env.NODE_ENV || "production"
+        secure: process.env.NODE_ENV === "production"
     }
 
     return res
@@ -121,7 +120,6 @@ const refreshAccessToken = asyncHandler(async (req,res) => {
     try {
         const decodedToken = jwt.verify(incomingRefreshToken, process.env.JWT_SECRET);
         const user = await UserModel.findById(decodedToken?._id);
-        console.log(user)
         if (!user) {
             throw new ApiError(401, 'invalid refresh token');
         }
@@ -132,19 +130,19 @@ const refreshAccessToken = asyncHandler(async (req,res) => {
 
         const options = {
             httpOnly: true,
-            secure: process.env.NODE_ENV || "production"
+            secure: process.env.NODE_ENV === "production"
         }
 
-        const { accessToken, refreshToken: newRefreshToken } = await generateAccessAndRefreshToken(user._id);
+        const { accessToken: newToken, refreshToken } = await generateAccessAndRefreshToken(user._id);
 
         return res
             .status(200)    
-            .cookie('accessToken', accessToken, options)
-            .cookie('refreshToken', newRefreshToken, options)   
+            .cookie('accessToken', newToken, options)
+            .cookie('refreshToken', refreshToken, options)   
             .json(
                 new ApiResponse(
                     200,
-                    { accessToken, refreshToken: newRefreshToken },
+                    { newToken, refreshToken },
                     'access token refreshed successfully'
                 )
             );
@@ -163,7 +161,7 @@ const updatePassword = asyncHandler(async (req,res) => {
         throw new ApiError(401, 'Incorrect password')
     }
 
-    user.password = newPassword; // we have implemented hashing in "pre" hook in UserModel
+    user.password = newPassword; // implemented hashing in "pre" hook in UserModel
     await user.save({ validateBeforeSave: false });
 
     return res.status(200).json(new ApiResponse(201, {}, 'Password updated Successfully'))

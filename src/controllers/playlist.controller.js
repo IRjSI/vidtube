@@ -5,7 +5,6 @@ import { asyncHandler } from "../utils/asyncHandler.js"
 
 const createPlaylist = asyncHandler(async (req, res) => {
     const {name, description} = req.body
-    //TODO: create playlist
     const newPlaylist = await PlaylistModel.create({
         name,
         description,
@@ -20,7 +19,6 @@ const createPlaylist = asyncHandler(async (req, res) => {
 
 const getUserPlaylists = asyncHandler(async (req, res) => {
     const { userId } = req.params
-    //TODO: get user playlists
     const playlists = await PlaylistModel.find({ owner: userId }) // never returns null or undefined, returns empty array if nothing found
     if (!playlists.length) {
         throw new ApiError(404, 'playlists not found')
@@ -31,7 +29,6 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
 
 const getPlaylistById = asyncHandler(async (req, res) => {
     const { playlistId } = req.params
-    //TODO: get playlist by id
     const playlist = await PlaylistModel.findById(playlistId)
     if (!playlist) {
         throw new ApiError(404, 'playlist not found')
@@ -54,7 +51,6 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
 
 const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
     const { playlistId, videoId } = req.params
-    // TODO: remove video from playlist
     const playlistToBeUpdated = await PlaylistModel.findById(playlistId)
     
     playlistToBeUpdated.video = playlistToBeUpdated.video.filter(item => item !== videoId)
@@ -65,7 +61,6 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
 
 const deletePlaylist = asyncHandler(async (req, res) => {
     const { playlistId } = req.params
-    // TODO: delete playlist
     await PlaylistModel.findByIdAndDelete(playlistId)
 
     return res.status(200).json(new ApiResponse(200, {}, 'playlist deleted'));
@@ -74,7 +69,6 @@ const deletePlaylist = asyncHandler(async (req, res) => {
 const updatePlaylist = asyncHandler(async (req, res) => {
     const { playlistId } = req.params
     const { name, description } = req.body
-    //TODO: update playlist
     const updatedPlaylist = await PlaylistModel.findByIdAndUpdate(playlistId, {
         $set: {
             name,

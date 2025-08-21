@@ -5,7 +5,6 @@ import { TweetModel } from "../models/tweet.model.js"
 import { SubscriptionModel } from "../models/subscription.model.js"
 
 const createTweet = asyncHandler(async (req, res) => {
-    //TODO: create tweet
     const { content } = req.body;
 
     const newTweet = await TweetModel.create({
@@ -19,18 +18,7 @@ const createTweet = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(201, newTweet, 'Tweet created'))
 })
 
-const getUserTweets = asyncHandler(async (req, res) => {
-    // TODO: get user tweets
-    const tweets = await TweetModel.find({ owner: req.user?._id });
-    if (!tweets) {
-        throw new ApiError(404, 'no tweets found')
-    }
-    
-    return res.status(200).json(new ApiResponse(200, tweets, 'All tweets'))
-})
-
 const getAllTweets = asyncHandler(async (req, res) => {
-    // TODO: get user tweets
     const channels = await SubscriptionModel.find({ subscriber: req.user?._id }).select("channel");
 
     const tweets = await TweetModel.aggregate([
@@ -55,8 +43,16 @@ const getAllTweets = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, tweets, 'All tweets'))
 })
 
+const getUserTweets = asyncHandler(async (req, res) => {
+    const tweets = await TweetModel.find({ owner: req.user?._id });
+    if (!tweets) {
+        throw new ApiError(404, 'no tweets found')
+    }
+    
+    return res.status(200).json(new ApiResponse(200, tweets, 'All tweets'))
+})
+
 const updateTweet = asyncHandler(async (req, res) => {
-    //TODO: update tweet
     const { tweetId } = req.params;
     const { newContent } = req.body;
     const tweet = await TweetModel.findOneAndUpdate({ _id: tweetId, owner: req.user._id /* only owner can edit */ }, {
@@ -72,7 +68,6 @@ const updateTweet = asyncHandler(async (req, res) => {
 })
 
 const deleteTweet = asyncHandler(async (req, res) => {
-    //TODO: delete tweet
     const { tweetId } = req.params;
 
     await TweetModel.findOneAndDelete({ _id: tweetId, owner: req.user._id })

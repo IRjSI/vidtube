@@ -1,11 +1,9 @@
 import { LikeModel } from "../models/like.model.js"
-import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 
 const toggleVideoLike = asyncHandler(async (req, res) => {
     const { videoId } = req.params
-    //TODO: toggle like on video
     const alreadyLiked = await LikeModel.findOne({
         video: videoId,
         likedBy: req.user?._id
@@ -47,7 +45,6 @@ const videoLikeStatus = asyncHandler(async (req,res) => {
 
 const toggleCommentLike = asyncHandler(async (req, res) => {
     const {commentId} = req.params
-    //TODO: toggle like on comment
     const alreadyLiked = await LikeModel.findOne({
         comment: commentId,
         likedBy: req.user?._id
@@ -73,7 +70,6 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
 
 const toggleTweetLike = asyncHandler(async (req, res) => {
     const {tweetId} = req.params
-    //TODO: toggle like on tweet
     const alreadyLiked = await LikeModel.findOne({
         tweet: tweetId,
         likedBy: req.user?._id
@@ -99,7 +95,6 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
 )
 
 const getLikedVideos = asyncHandler(async (req, res) => {
-    //TODO: get all liked videos
     const allLikedVideos = await LikeModel.aggregate([
         {
             "$match": {
@@ -129,9 +124,9 @@ const getLikedVideos = asyncHandler(async (req, res) => {
 })
 
 export {
+    toggleVideoLike,
     toggleCommentLike,
     toggleTweetLike,
-    toggleVideoLike,
     getLikedVideos,
     videoLikeStatus
 }

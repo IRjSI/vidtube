@@ -1,13 +1,21 @@
 import express from "express";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
-import { getLikedVideos, toggleCommentLike, toggleTweetLike, toggleVideoLike, videoLikeStatus } from "../controllers/like.controller.js";
+import {
+    getLikedVideos,
+    toggleCommentLike,
+    toggleTweetLike,
+    toggleVideoLike,
+    videoLikeStatus
+} from "../controllers/like.controller.js";
 
 const likeRouter = express.Router();
 
-likeRouter.post('/video/:videoId', verifyJWT, toggleVideoLike);
-likeRouter.get('/video-status/:videoId', verifyJWT, videoLikeStatus);
-likeRouter.post('/comment/:commentId', verifyJWT, toggleCommentLike);
-likeRouter.post('/tweet/:tweetId', verifyJWT, toggleTweetLike);
-likeRouter.get('/all-videos', verifyJWT, getLikedVideos);
+likeRouter.use(verifyJWT);
+
+likeRouter.post('/video/:videoId', toggleVideoLike);
+likeRouter.get('/video-status/:videoId', videoLikeStatus);
+likeRouter.post('/comment/:commentId', toggleCommentLike);
+likeRouter.post('/tweet/:tweetId', toggleTweetLike);
+likeRouter.get('/all-videos', getLikedVideos);
 
 export default likeRouter;

@@ -12,3 +12,5 @@ const storage = multer.diskStorage({
 export const upload = multer({
     storage
 })
+
+// const upload = multer({ dest: "./public" }) // may use this

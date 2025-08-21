@@ -64,9 +64,6 @@ const getMyVideos = asyncHandler(async (req,res) => {
 
 const publishAVideo = asyncHandler(async (req, res) => {
     const { title, description } = req.body
-    // TODO: get video, upload to cloudinary, create video
-
-    // get video
 
     const videoLocalPath = req.files?.video?.[0]?.path
     const thumbnailLocalPath = req.files?.thumbnail?.[0]?.path
@@ -74,12 +71,8 @@ const publishAVideo = asyncHandler(async (req, res) => {
         throw new ApiError(400, 'Video file required')
     }
 
-    // upload on cloudinary
-
     const video = await uploadOnCloudinary(videoLocalPath);
     const thumbnail = await uploadOnCloudinary(thumbnailLocalPath);
-
-    // create video
 
     const newVideo = await VideoModel.create({
         videoFile: video.url,
@@ -99,7 +92,6 @@ const publishAVideo = asyncHandler(async (req, res) => {
 const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     
-    //TODO: get video by id
     const video = await VideoModel.aggregate([
         {
             "$match": {
@@ -124,8 +116,8 @@ const getVideoById = asyncHandler(async (req, res) => {
 
 const updateVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
-    //TODO: update video details like title, description, thumbnail
     const { title, description } = req.body;
+
     const thumbnailLocalPath = req.file?.path;
     if (!thumbnailLocalPath) {
         throw new ApiError(400, 'thumbnail file required')
@@ -142,7 +134,7 @@ const updateVideo = asyncHandler(async (req, res) => {
             description,
             thumbnail: thumbnail.url
         }
-    }, { new: true });
+    }, { new: true }); // WHY new true?
     if (!video) {
         throw new ApiError(404, 'video not found')
     }
@@ -152,7 +144,6 @@ const updateVideo = asyncHandler(async (req, res) => {
 
 const deleteVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
-    //TODO: delete video
 
     await VideoModel.findOneAndDelete({ _id: videoId, owner: req.user._id });
 
