@@ -5,6 +5,7 @@ import VideoModel from "../models/video.model.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { SubscriptionModel } from "../models/subscription.model.js"
+import client from "../utils/redis.js"
 
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
@@ -167,17 +168,20 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
 
 const addView = asyncHandler(async (req, res) => {
     const { videoId } = req.params
+    const userId = req.user?._id;
+    const ip = req.ip;
 
-    const video = await VideoModel.findOneAndUpdate({ _id: videoId }, {
-        $inc: {
-            views: 1
-        }
-    }, { new: true })
-    if (!video) {
-        throw new ApiError(404, 'video not found')
+    const identifier = userId ? `user:${userId}` : `ip:${ip}`;
+    const redisKey = `video:${videoId}:viewed:${identifier}`;
+
+    const alreadyViewed = await client.exists(redisKey);
+
+    if (!alreadyViewed) {
+        await VideoModel.findByIdAndUpdate(videoId, { $inc: { views: 1 } });
+        await client.set(redisKey, "1", { EX: 60 * 60 * 24 }); // 24h
     }
 
-    return res.status(200).json(new ApiResponse(200, video, 'view incremented'))
+    return res.status(200).json(new ApiResponse(200, null, 'view recorded'))
 })
 
 export {
