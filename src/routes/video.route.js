@@ -14,6 +14,10 @@ import {
 
 const videoRouter = express.Router();
 
+videoRouter.get('/get-videos', getAllVideos);
+videoRouter.get('/get-video/:videoId', getVideoById);
+videoRouter.patch('/inc-view/:videoId', addView);
+
 // middleware for all routes
 videoRouter.use(verifyJWT);
 
@@ -27,13 +31,10 @@ videoRouter.post('/upload-video', upload.fields([
         maxCount: 1
     }
 ]), publishAVideo);
-videoRouter.get('/get-videos', getAllVideos);
 videoRouter.get('/get-my-videos', getMyVideos);
-videoRouter.get('/get-video/:videoId', getVideoById);
 videoRouter.patch('/update-video/:videoId', upload.single('thumbnail'), updateVideo);
 videoRouter.delete('/delete-video/:videoId', deleteVideo);
 videoRouter.patch('/publish/:videoId', togglePublishStatus);
 
-videoRouter.patch('/inc-view/:videoId', addView);
 
 export default videoRouter;

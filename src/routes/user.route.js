@@ -37,13 +37,13 @@ userRouter.post('/login', loginUser);
 userRouter.post('/logout', verifyJWT, logoutUser);
 userRouter.post('/refresh-token', refreshAccessToken);
 
+userRouter.get('/get-user-search/:username', getUserByQuery);
+userRouter.get('/get-user-by-search', getUserBySearch);
+
 // middleware for all routes
 userRouter.use(verifyJWT);
 
-// profile routes
 userRouter.get('/get-user', getUser);
-userRouter.get('/get-user-search/:username', getUserByQuery);
-userRouter.get('/get-user-by-search', getUserBySearch);
 
 // profile updation routes
 userRouter.post('/update-details', updateDetails);

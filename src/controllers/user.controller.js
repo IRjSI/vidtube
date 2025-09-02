@@ -4,7 +4,7 @@ import UserModel from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { uploadThumbnailOnCloudinary } from "../utils/cloudinary.js";
 import jwt from "jsonwebtoken";
 
 const generateAccessAndRefreshToken = async (userId) => {
@@ -44,8 +44,8 @@ const registerUser = asyncHandler(async (req,res) => {
     }
 
     // send this images on cloudinary
-    const avatar = await uploadOnCloudinary(avatarLocalPath);
-    const coverImage = coverImageLocalPath ? await uploadOnCloudinary(coverImageLocalPath) : '';
+    const avatar = await uploadThumbnailOnCloudinary(avatarLocalPath);
+    const coverImage = coverImageLocalPath ? await uploadThumbnailOnCloudinary(coverImageLocalPath) : '';
 
     const newUser = await UserModel.create({
         fullname,

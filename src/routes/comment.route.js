@@ -9,10 +9,11 @@ import {
 
 const commentRouter = express.Router();
 
+commentRouter.get('/all-comments/:videoId', getVideoComments);
+
 commentRouter.use(verifyJWT);
 
 commentRouter.post('/add/:videoId', addComment);
-commentRouter.get('/all-comments/:videoId', getVideoComments);
 commentRouter.patch('/update/:commentId', updateComment);
 commentRouter.patch('/delete/:commentId', deleteComment);
 

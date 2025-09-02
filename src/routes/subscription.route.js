@@ -9,11 +9,12 @@ import {
 
 const subscriptionRouter = express.Router();
 
+subscriptionRouter.get('/get-channels', getSubscribedChannels);
+
 subscriptionRouter.use(verifyJWT);
 
 subscriptionRouter.patch('/toggle/:channelId', toggleSubscription);
 subscriptionRouter.get('/get-subscribers', getUserChannelSubscribers);
-subscriptionRouter.get('/get-channels', getSubscribedChannels);
 subscriptionRouter.get('/get-status/:channelId', getSubscribeStatus);
 
 export default subscriptionRouter;

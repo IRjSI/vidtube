@@ -10,26 +10,46 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 })
 
-const uploadOnCloudinary = async (localFilePath) => {
+// Upload Video with HLS
+const uploadVideoOnCloudinary = async (localFilePath) => {
     try {
-        if (!localFilePath) {
-            return null;
-        }
-        const response = await cloudinary.uploader.upload(
-            localFilePath, {
-                resource_type: "auto"
-            }
-        )
-        console.log('File uploaded on cloudinary');
-        // once the file is uploaded on cloudinary delete it from our server
+        if (!localFilePath) return null;
+
+        const response = await cloudinary.uploader.upload(localFilePath, {
+            resource_type: "video",
+            eager_async: true,  // Process transformations asynchronously
+            eager: [
+                { streaming_profile: "auto", format: "m3u8" }
+            ]
+        });
+        console.log("Video uploaded on Cloudinary (HLS ready)");
         fs.unlinkSync(localFilePath);
         return response;
     } catch (error) {
-        console.log(error);
-        fs.unlinkSync(localFilePath);
+        console.error("Error uploading video:", error);
+        if (fs.existsSync(localFilePath)) fs.unlinkSync(localFilePath);
         return null;
     }
-}
+};
+
+// Upload Thumbnail (Image)
+const uploadThumbnailOnCloudinary = async (localFilePath) => {
+    try {
+        if (!localFilePath) return null;
+
+        const response = await cloudinary.uploader.upload(localFilePath, {
+            resource_type: "image"
+        });
+
+        console.log("Thumbnail uploaded on Cloudinary");
+        fs.unlinkSync(localFilePath);
+        return response;
+    } catch (error) {
+        console.error("Error uploading thumbnail:", error);
+        if (fs.existsSync(localFilePath)) fs.unlinkSync(localFilePath);
+        return null;
+    }
+};
 
 const deleteFromCloudinary = async (publicId) => {
     try {
@@ -41,4 +61,4 @@ const deleteFromCloudinary = async (publicId) => {
     }
 }
 
-export { uploadOnCloudinary, deleteFromCloudinary };
+export { uploadVideoOnCloudinary, uploadThumbnailOnCloudinary, deleteFromCloudinary };

@@ -1,6 +1,6 @@
 import mongoose from "mongoose"
 import { ApiError } from "../utils/ApiError.js"
-import { uploadOnCloudinary } from "../utils/cloudinary.js"
+import { uploadThumbnailOnCloudinary, uploadVideoOnCloudinary } from "../utils/cloudinary.js"
 import VideoModel from "../models/video.model.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
@@ -8,7 +8,7 @@ import { SubscriptionModel } from "../models/subscription.model.js"
 import client from "../utils/redis.js"
 
 const getAllVideos = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
+    const { page = 1, limit = 24, query, sortBy, sortType, userId } = req.query
     //TODO: get all videos based on query, sort, pagination
     // const channels = await SubscriptionModel.find({ subscriber: req.user?._id }).select("channel");
 
@@ -72,12 +72,13 @@ const publishAVideo = asyncHandler(async (req, res) => {
         throw new ApiError(400, 'Video file required')
     }
 
-    const video = await uploadOnCloudinary(videoLocalPath);
-    const thumbnail = await uploadOnCloudinary(thumbnailLocalPath);
+    const video = await uploadVideoOnCloudinary(videoLocalPath);
+    console.log(video)
+    const thumbnail = await uploadThumbnailOnCloudinary(thumbnailLocalPath);
 
     const newVideo = await VideoModel.create({
-        videoFile: video.url,
-        thumbnail: thumbnail.url,
+        videoFile: video.secure_url.replace('/upload/', '/upload/sp_auto/').replace('.mp4', '.m3u8'),
+        thumbnail: thumbnail.secure_url,
         title,
         description,
         duration: video.duration,
