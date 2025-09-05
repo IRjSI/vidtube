@@ -24,10 +24,12 @@ const uploadVideoOnCloudinary = async (localFilePath) => {
         });
         console.log("Video uploaded on Cloudinary (HLS ready)");
         fs.unlinkSync(localFilePath);
+
         return response;
     } catch (error) {
         console.error("Error uploading video:", error);
         if (fs.existsSync(localFilePath)) fs.unlinkSync(localFilePath);
+
         return null;
     }
 };
@@ -43,10 +45,12 @@ const uploadThumbnailOnCloudinary = async (localFilePath) => {
 
         console.log("Thumbnail uploaded on Cloudinary");
         fs.unlinkSync(localFilePath);
+
         return response;
     } catch (error) {
         console.error("Error uploading thumbnail:", error);
         if (fs.existsSync(localFilePath)) fs.unlinkSync(localFilePath);
+
         return null;
     }
 };
@@ -55,6 +59,8 @@ const deleteFromCloudinary = async (publicId) => {
     try {
         const response = await cloudinary.uploader.destroy(publicId)
         console.log('Deleted from Cloudinary');
+        
+        return response;
     } catch (error) {
         console.log(error);
         return null;
